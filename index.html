@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="План ИИ+PM">
+<meta name="theme-color" content="#5B4BB7">
+<title>План: ИИ-бизнес + AI PM</title>
+<style>
+:root{--n:#EEEDFE;--off:#E1F5EE;--d:#FAEEDA;--nT:#3C3489;--offT:#0F6E56;--dT:#854F0B;
+--accent:#5B4BB7;--ink:#1A1A2E;--muted:#6b6a77;--line:#e2e0ee;--bg:#F4F3F8;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+background:var(--bg);color:var(--ink);padding-bottom:env(safe-area-inset-bottom);}
+header{background:linear-gradient(135deg,#5B4BB7,#7A5FD0);color:#fff;padding:calc(env(safe-area-inset-top) + 18px) 18px 18px;position:sticky;top:0;z-index:5;}
+header h1{margin:0 0 4px;font-size:19px;font-weight:700;}
+header p{margin:0;font-size:12.5px;opacity:.9;line-height:1.35;}
+.progress{margin-top:12px;background:rgba(255,255,255,.25);border-radius:20px;height:8px;overflow:hidden;}
+.progress span{display:block;height:100%;background:#fff;width:0;transition:width .3s;}
+.pl{margin-top:6px;font-size:12px;opacity:.95;}
+.legend{display:flex;gap:6px;padding:12px 14px 4px;flex-wrap:wrap;}
+.chip{font-size:11px;padding:4px 9px;border-radius:20px;font-weight:600;}
+.chip.n{background:var(--n);color:var(--nT);}.chip.off{background:var(--off);color:var(--offT);}
+.chip.d{background:var(--d);color:var(--dT);}
+.month{padding:8px 12px 4px;}
+.month h2{font-size:16px;color:var(--accent);margin:14px 2px 8px;}
+.wd{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px;}
+.wd span{text-align:center;font-size:10px;color:var(--muted);font-weight:600;}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.cell{position:relative;min-height:58px;border-radius:9px;padding:4px 4px 3px;overflow:hidden;
+border:0.5px solid var(--line);background:#fff;display:flex;flex-direction:column;}
+.cell.empty{background:transparent;border:none;}
+.cell.pre{background:#fafafd;}
+.cell.pre .dn{color:#c3c1d4;}
+.cell.n{background:var(--n);}.cell.off{background:var(--off);}.cell.d{background:var(--d);}
+.cell .dn{font-size:12px;font-weight:700;line-height:1;}
+.cell .sh{font-size:7px;margin-top:1px;opacity:.85;}
+.cell.n .sh{color:var(--nT);}.cell.off .sh{color:var(--offT);}.cell.d .sh{color:var(--dT);}
+.cell .tk{font-size:8px;line-height:1.15;margin-top:2px;color:var(--ink);}
+.cell.has{cursor:pointer;}
+.cell.has:active{transform:scale(.96);}
+.cell.today{outline:2px solid var(--accent);outline-offset:-2px;}
+.cell .chk{position:absolute;top:3px;right:4px;font-size:11px;color:#fff;background:var(--offT);
+width:15px;height:15px;border-radius:50%;display:none;align-items:center;justify-content:center;line-height:1;}
+.cell.done .chk{display:flex;}
+.cell.done .tk{text-decoration:line-through;opacity:.5;}
+.cell.done{opacity:.72;}
+.note{font-size:11.5px;color:var(--muted);padding:2px 4px 10px;line-height:1.4;}
+.road{margin:6px 14px 24px;}
+.road h2{font-size:16px;color:var(--accent);}
+.road .card{background:#fff;border:0.5px solid var(--line);border-left:3px solid var(--accent);
+border-radius:10px;padding:12px 14px;margin-bottom:10px;}
+.road .card.t{border-left-color:var(--offT);}
+.road .card b{font-size:13px;}
+.road ul{margin:6px 0 0;padding-left:18px;}
+.road li{font-size:12.5px;line-height:1.5;margin-bottom:3px;color:var(--ink);}
+/* sheet */
+.backdrop{position:fixed;inset:0;background:rgba(20,18,40,.45);opacity:0;pointer-events:none;
+transition:opacity .2s;z-index:20;}
+.backdrop.open{opacity:1;pointer-events:auto;}
+.sheet{position:fixed;left:0;right:0;bottom:0;background:#fff;border-radius:20px 20px 0 0;
+padding:18px 20px calc(env(safe-area-inset-bottom) + 22px);transform:translateY(110%);
+transition:transform .25s;z-index:21;box-shadow:0 -8px 30px rgba(0,0,0,.15);}
+.sheet.open{transform:translateY(0);}
+.sheet .bar{width:40px;height:4px;background:#d8d6e4;border-radius:4px;margin:0 auto 14px;}
+.sheet .date{font-size:13px;color:var(--muted);}
+.sheet .shbadge{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600;margin:6px 0 10px;}
+.sheet .full{font-size:15px;line-height:1.5;margin-bottom:18px;}
+.sheet button{width:100%;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:600;
+color:#fff;background:var(--accent);}
+.sheet button.done-btn{background:var(--offT);}
+.foot{text-align:center;font-size:11px;color:var(--muted);padding:0 20px 26px;line-height:1.5;}
+</style>
+
+</head>
+<body>
+<header>
+<h1>План: ИИ-бизнес + AI PM</h1>
+<p>Сентябрь–ноябрь. Тапни день с задачей — откроется детально, отметь «готово».</p>
+<div class="progress"><span id="pbar"></span></div>
+<div class="pl" id="plabel">Выполнено 0 из 53</div>
+</header>
+
+<div class="legend">
+<span class="chip n">ночная — отдых</span>
+<span class="chip off">выходной — крупные задачи</span>
+<span class="chip d">дневная — ~30 мин</span>
+</div>
+
+<section class="month"><h2>Сентябрь 2026</h2><div class="wd"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div><div class="grid">
+<div class="cell empty"></div>
+<div class="cell pre"><span class="dn">1</span></div>
+<div class="cell pre"><span class="dn">2</span></div>
+<div class="cell pre"><span class="dn">3</span></div>
+<div class="cell pre"><span class="dn">4</span></div>
+<div class="cell pre"><span class="dn">5</span></div>
+<div class="cell pre"><span class="dn">6</span></div>
+<div class="cell n" data-date="2026-09-07" data-shift="ночная"><span class="dn">7</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell n" data-date="2026-09-08" data-shift="ночная"><span class="dn">8</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell off has" data-date="2026-09-09" data-shift="выходной" data-full="Создан @aiflow.dubai: профессиональный аккаунт, категория, аватар, 2FA, английская шапка."><span class="dn">9</span><span class="sh">выходной</span><span class="tk">Instagram-старт</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-09-10" data-shift="выходной" data-full="Регистрация, онбординг, первый проект. Разобралась: Agent, Knowledge base, Run."><span class="dn">10</span><span class="sh">выходной</span><span class="tk">Voiceflow</span><span class="chk">✓</span></div>
+<div class="cell d" data-date="2026-09-11" data-shift="дневная"><span class="dn">11</span><span class="sh">дневная</span><span class="tk">Отдых</span></div>
+<div class="cell d" data-date="2026-09-12" data-shift="дневная"><span class="dn">12</span><span class="sh">дневная</span><span class="tk">Отдых</span></div>
+<div class="cell off has" data-date="2026-09-13" data-shift="выходной" data-full="Global prompt для ALIEV AI: Role, Goal, Key facts, Tone, Guardrails."><span class="dn">13</span><span class="sh">выходной</span><span class="tk">Мозг агента</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-09-14" data-shift="выходной" data-full="Plain text в Knowledge base: услуги, сроки, оплата, языки, график."><span class="dn">14</span><span class="sh">выходной</span><span class="tk">База знаний</span><span class="chk">✓</span></div>
+<div class="cell n" data-date="2026-09-15" data-shift="ночная"><span class="dn">15</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell n" data-date="2026-09-16" data-shift="ночная"><span class="dn">16</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell off" data-date="2026-09-17" data-shift="выходной"><span class="dn">17</span><span class="sh">выходной</span><span class="tk">Отдых</span></div>
+<div class="cell off" data-date="2026-09-18" data-shift="выходной"><span class="dn">18</span><span class="sh">выходной</span><span class="tk">Отдых</span></div>
+<div class="cell d" data-date="2026-09-19" data-shift="дневная"><span class="dn">19</span><span class="sh">дневная</span><span class="tk">Отдых</span></div>
+<div class="cell d" data-date="2026-09-20" data-shift="дневная"><span class="dn">20</span><span class="sh">дневная</span><span class="tk">Отдых</span></div>
+<div class="cell off has" data-date="2026-09-21" data-shift="выходной" data-full="Цена, срочность, реквизиты — бот устоял. Три языка проверены."><span class="dn">21</span><span class="sh">выходной</span><span class="tk">Тест ловушками</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-09-22" data-shift="выходной" data-full="Сравнение цен, переключение на Gemini 3 Flash — в 10 раз дешевле."><span class="dn">22</span><span class="sh">выходной</span><span class="tk">Выбор модели</span><span class="chk">✓</span></div>
+<div class="cell n" data-date="2026-09-23" data-shift="ночная"><span class="dn">23</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell n" data-date="2026-09-24" data-shift="ночная"><span class="dn">24</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell off" data-date="2026-09-25" data-shift="выходной"><span class="dn">25</span><span class="sh">выходной</span><span class="tk">Отдых</span></div>
+<div class="cell off" data-date="2026-09-26" data-shift="выходной"><span class="dn">26</span><span class="sh">выходной</span><span class="tk">Отдых</span></div>
+<div class="cell d" data-date="2026-09-27" data-shift="дневная"><span class="dn">27</span><span class="sh">дневная</span><span class="tk">Отдых</span></div>
+<div class="cell d" data-date="2026-09-28" data-shift="дневная"><span class="dn">28</span><span class="sh">дневная</span><span class="tk">Отдых</span></div>
+<div class="cell off has" data-date="2026-09-29" data-shift="выходной" data-full="Запись экрана с русским диалогом."><span class="dn">29</span><span class="sh">выходной</span><span class="tk">Демо-запись RU</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-09-30" data-shift="выходной" data-full="Запись английской версии."><span class="dn">30</span><span class="sh">выходной</span><span class="tk">Демо-запись EN</span><span class="chk">✓</span></div>
+</div>
+<div class="note">Сентябрь — то, что уже сделано. Отметь галочками.</div></section>
+<section class="month"><h2>Октябрь 2026</h2><div class="wd"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div><div class="grid">
+<div class="cell empty"></div>
+<div class="cell empty"></div>
+<div class="cell empty"></div>
+<div class="cell n" data-date="2026-10-01" data-shift="ночная"><span class="dn">1</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell n" data-date="2026-10-02" data-shift="ночная"><span class="dn">2</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell off has" data-date="2026-10-03" data-shift="выходной" data-full="Workflows: меню кнопок (цены, сроки, как заказать) на Text-блоках — отвечают без ИИ, бесплатно. Кнопка «другой вопрос» → к агенту."><span class="dn">3</span><span class="sh">выходной</span><span class="tk">1.1 Учусь: роутер</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-10-04" data-shift="выходной" data-full="Tools → Google Sheets: заявка падает строкой в таблицу. Плюс уведомление владельцу. Проверить на тестовом заказе."><span class="dn">4</span><span class="sh">выходной</span><span class="tk">1.2 Учусь: заявки</span><span class="chk">✓</span></div>
+<div class="cell d has" data-date="2026-10-05" data-shift="дневная" data-full="Замерить: расход кредитов до и после роутера, время ответа бота. Записать в заметки — это твои аргументы в продаже."><span class="dn">5</span><span class="sh">дневная</span><span class="tk">1.3 Фиксирую цифры</span><span class="chk">✓</span></div>
+<div class="cell d has" data-date="2026-10-06" data-shift="дневная" data-full="CapCut: обрезать, ускорить 1.5x, плашка «AI agent that takes orders 24/7», в конце «DM START»."><span class="dn">6</span><span class="sh">дневная</span><span class="tk">1.4 Монтаж Reels</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-10-07" data-shift="выходной" data-full="Выложить Reels + пост-знакомство со студией. Первый контент в профиле."><span class="dn">7</span><span class="sh">выходной</span><span class="tk">1.5 Публикую</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-10-08" data-shift="выходной" data-full="Два поста: «ИИ-агенты — как работает» и «Услуги списком». Canva, единый фиолетовый стиль."><span class="dn">8</span><span class="sh">выходной</span><span class="tk">1.6 Публикую</span><span class="chk">✓</span></div>
+<div class="cell n" data-date="2026-10-09" data-shift="ночная"><span class="dn">9</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell n" data-date="2026-10-10" data-shift="ночная"><span class="dn">10</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell off has" data-date="2026-10-11" data-shift="выходной" data-full="Список 30 бизнесов: салоны, рестораны, агентства. Имя, @аккаунт, чем цепляет. Отметить русскоязычных владельцев."><span class="dn">11</span><span class="sh">выходной</span><span class="tk">1.7 Готовлю продажу</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-10-12" data-shift="выходной" data-full="Анонс в русскоязычных чатах Дубая + личная рассылка знакомым. Пилот со скидкой первым трём."><span class="dn">12</span><span class="sh">выходной</span><span class="tk">1.8 Продаю</span><span class="chk">✓</span></div>
+<div class="cell d has" data-date="2026-10-13" data-shift="дневная" data-full="Пять сообщений по скрипту: заметила ваш бизнес → настраиваю ИИ-ботов → бесплатное демо за 15 минут."><span class="dn">13</span><span class="sh">дневная</span><span class="tk">1.9 Директ ×5</span><span class="chk">✓</span></div>
+<div class="cell d has" data-date="2026-10-14" data-shift="дневная" data-full="Ещё пять. Фиксировать в таблице: ответил / отказал / думает."><span class="dn">14</span><span class="sh">дневная</span><span class="tk">1.10 Директ ×5</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-10-15" data-shift="выходной" data-full="Coursera → Microsoft AI PM → Enroll free → Audit the course. Первый модуль."><span class="dn">15</span><span class="sh">выходной</span><span class="tk">Курс, модуль 1</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-10-16" data-shift="выходной" data-full="Настроить бота первому клиенту: собрать факты, залить в базу, прописать мозг, тест ловушками."><span class="dn">16</span><span class="sh">выходной</span><span class="tk">1.11 Пилот №1</span><span class="chk">✓</span></div>
+<div class="cell n" data-date="2026-10-17" data-shift="ночная"><span class="dn">17</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell n" data-date="2026-10-18" data-shift="ночная"><span class="dn">18</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell off has" data-date="2026-10-19" data-shift="выходной" data-full="Собрать одностраничник в Tilda или Framer: оффер, выгоды, форма заявки. Тренировка на вымышленном салоне."><span class="dn">19</span><span class="sh">выходной</span><span class="tk">2.1 Учусь</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-10-20" data-shift="выходной" data-full="Реальный лендинг для ALIEV AI и привязать к нему бота. Это твой второй кейс."><span class="dn">20</span><span class="sh">выходной</span><span class="tk">2.2 Делаю своё</span><span class="chk">✓</span></div>
+<div class="cell d has" data-date="2026-10-21" data-shift="дневная" data-full="Скрины до/после, ссылка, что умеет. Плюс первые цифры пилотного бота — прочитать транскрипты, поправить ошибки."><span class="dn">21</span><span class="sh">дневная</span><span class="tk">2.3 Фиксирую</span><span class="chk">✓</span></div>
+<div class="cell d has" data-date="2026-10-22" data-shift="дневная" data-full="Пост + Reels про лендинг: «сайт с формой за один день». Показать свой пример."><span class="dn">22</span><span class="sh">дневная</span><span class="tk">2.4 Публикую</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-10-23" data-shift="выходной" data-full="Второй модуль Coursera. Выписать, что уже умеешь — пригодится для резюме."><span class="dn">23</span><span class="sh">выходной</span><span class="tk">Курс, модуль 2</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-10-24" data-shift="выходной" data-full="Директ ×10 — теперь оффер шире: бот + лендинг. Прикладывать ссылку на свой."><span class="dn">24</span><span class="sh">выходной</span><span class="tk">2.5 Продаю</span><span class="chk">✓</span></div>
+<div class="cell n" data-date="2026-10-25" data-shift="ночная"><span class="dn">25</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell n" data-date="2026-10-26" data-shift="ночная"><span class="dn">26</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell off has" data-date="2026-10-27" data-shift="выходной" data-full="Процесс: сценарий → Kling/Hailuo → CapCut → субтитры. Сделать 3 ролика за заход."><span class="dn">27</span><span class="sh">выходной</span><span class="tk">3.1 Учусь и делаю</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-10-28" data-shift="выходной" data-full="Выложить ролики. Пост про услугу видео: 8 роликов в месяц, без съёмок и актёров."><span class="dn">28</span><span class="sh">выходной</span><span class="tk">3.2 Публикую</span><span class="chk">✓</span></div>
+<div class="cell d has" data-date="2026-10-29" data-shift="дневная" data-full="Пять сообщений. Оффер: видео привлекает → бот ловит заявку."><span class="dn">29</span><span class="sh">дневная</span><span class="tk">3.3 Директ ×5</span><span class="chk">✓</span></div>
+<div class="cell d has" data-date="2026-10-30" data-shift="дневная" data-full="Ещё пять. Прикладывать ролик как пример."><span class="dn">30</span><span class="sh">дневная</span><span class="tk">3.4 Директ ×5</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-10-31" data-shift="выходной" data-full="Кейс пилота до/после с цифрами, пост с результатом. Посчитать: написала / ответили / клиентов."><span class="dn">31</span><span class="sh">выходной</span><span class="tk">Итоги месяца</span><span class="chk">✓</span></div>
+</div>
+<div class="note">Цель октября: первый платящий клиент, первый кейс с цифрами, 6–8 публикаций в профиле.</div></section>
+<section class="month"><h2>Ноябрь 2026</h2><div class="wd"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div><div class="grid">
+<div class="cell empty"></div>
+<div class="cell empty"></div>
+<div class="cell empty"></div>
+<div class="cell empty"></div>
+<div class="cell empty"></div>
+<div class="cell empty"></div>
+<div class="cell off has" data-date="2026-11-01" data-shift="выходной" data-full="Собрать простое веб-приложение через ИИ: калькулятор или каталог. Разобраться, как это делается с нуля."><span class="dn">1</span><span class="sh">выходной</span><span class="tk">4.1 Учусь</span><span class="chk">✓</span></div>
+<div class="cell n" data-date="2026-11-02" data-shift="ночная"><span class="dn">2</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell n" data-date="2026-11-03" data-shift="ночная"><span class="dn">3</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell off has" data-date="2026-11-04" data-shift="выходной" data-full="Готовое мини-приложение под бизнес: запись, прайс-калькулятор. Выложить по ссылке, чтобы показывать."><span class="dn">4</span><span class="sh">выходной</span><span class="tk">4.2 Делаю демо</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-11-05" data-shift="выходной" data-full="Пост + Reels: «приложение без программиста». Показать своё."><span class="dn">5</span><span class="sh">выходной</span><span class="tk">4.3 Публикую</span><span class="chk">✓</span></div>
+<div class="cell d has" data-date="2026-11-06" data-shift="дневная" data-full="Пять сообщений с новым оффером."><span class="dn">6</span><span class="sh">дневная</span><span class="tk">4.4 Директ ×5</span><span class="chk">✓</span></div>
+<div class="cell d has" data-date="2026-11-07" data-shift="дневная" data-full="Ещё пять."><span class="dn">7</span><span class="sh">дневная</span><span class="tk">4.5 Директ ×5</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-11-08" data-shift="выходной" data-full="Третий модуль. Начать черновик резюме AI PM."><span class="dn">8</span><span class="sh">выходной</span><span class="tk">Курс, модуль 3</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-11-09" data-shift="выходной" data-full="Highlights: Кейсы, Отзывы, Что умею, Услуги. Контент-план: 2 поста и 2 Reels в неделю."><span class="dn">9</span><span class="sh">выходной</span><span class="tk">Instagram-система</span><span class="chk">✓</span></div>
+<div class="cell n" data-date="2026-11-10" data-shift="ночная"><span class="dn">10</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell n" data-date="2026-11-11" data-shift="ночная"><span class="dn">11</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell off has" data-date="2026-11-12" data-shift="выходной" data-full="Как бот подключается к Instagram и WhatsApp через Facebook-страницу. Пройти путь на своём аккаунте — чтобы отвечать клиенту уверенно."><span class="dn">12</span><span class="sh">выходной</span><span class="tk">5.1 Meta-подключение</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-11-13" data-shift="выходной" data-full="Сохранить структуру: мозг, база, роутер, таблица, уведомления. Следующему клиенту — за 2–3 часа вместо недели."><span class="dn">13</span><span class="sh">выходной</span><span class="tk">5.2 Шаблон бота</span><span class="chk">✓</span></div>
+<div class="cell d has" data-date="2026-11-14" data-shift="дневная" data-full="Пять сообщений. Оффер — связка: видео привлекает, бот ловит, лендинг закрывает."><span class="dn">14</span><span class="sh">дневная</span><span class="tk">5.3 Директ ×5</span><span class="chk">✓</span></div>
+<div class="cell d has" data-date="2026-11-15" data-shift="дневная" data-full="Ещё пять."><span class="dn">15</span><span class="sh">дневная</span><span class="tk">5.4 Директ ×5</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-11-16" data-shift="выходной" data-full="Оформить пакет под ключ: AED 5000–7000 запуск + AED 1500–2500/мес. Поднять цены на отдельные услуги."><span class="dn">16</span><span class="sh">выходной</span><span class="tk">5.5 Пакет и прайс</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-11-17" data-shift="выходной" data-full="Настроить второго клиента по шаблону первого."><span class="dn">17</span><span class="sh">выходной</span><span class="tk">6.1 Клиент №2</span><span class="chk">✓</span></div>
+<div class="cell n" data-date="2026-11-18" data-shift="ночная"><span class="dn">18</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell n" data-date="2026-11-19" data-shift="ночная"><span class="dn">19</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell off has" data-date="2026-11-20" data-shift="выходной" data-full="Десять сообщений за заход — по накопленному списку, с тремя кейсами в кармане."><span class="dn">20</span><span class="sh">выходной</span><span class="tk">6.2 Директ ×10</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-11-21" data-shift="выходной" data-full="Прочитать транскрипты всех клиентов за месяц, выписать где бот путался, поправить промпты."><span class="dn">21</span><span class="sh">выходной</span><span class="tk">6.3 Разбор ошибок</span><span class="chk">✓</span></div>
+<div class="cell d has" data-date="2026-11-22" data-shift="дневная" data-full="Пять сообщений, уже с тремя кейсами."><span class="dn">22</span><span class="sh">дневная</span><span class="tk">6.4 Директ ×5</span><span class="chk">✓</span></div>
+<div class="cell d has" data-date="2026-11-23" data-shift="дневная" data-full="Ещё пять."><span class="dn">23</span><span class="sh">дневная</span><span class="tk">6.5 Директ ×5</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-11-24" data-shift="выходной" data-full="Посчитать месячный доход с обслуживания. Предложить ретейнер всем, кто ещё не на нём."><span class="dn">24</span><span class="sh">выходной</span><span class="tk">6.6 Ретейнеры</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-11-25" data-shift="выходной" data-full="3 поста + Reels с живыми цифрами клиентов."><span class="dn">25</span><span class="sh">выходной</span><span class="tk">6.7 Контент</span><span class="chk">✓</span></div>
+<div class="cell n" data-date="2026-11-26" data-shift="ночная"><span class="dn">26</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell n" data-date="2026-11-27" data-shift="ночная"><span class="dn">27</span><span class="sh">ночная</span><span class="tk">Отдых</span></div>
+<div class="cell off has" data-date="2026-11-28" data-shift="выходной" data-full="Закончить курс. Решить, брать ли платный сертификат."><span class="dn">28</span><span class="sh">выходной</span><span class="tk">Курс: финал</span><span class="chk">✓</span></div>
+<div class="cell off has" data-date="2026-11-29" data-shift="выходной" data-full="Проекты, метрики, инструменты. LinkedIn обновить. Domovoy — только как маркетинг."><span class="dn">29</span><span class="sh">выходной</span><span class="tk">Резюме AI PM</span><span class="chk">✓</span></div>
+<div class="cell d has" data-date="2026-11-30" data-shift="дневная" data-full="Клиенты, доход, кейсы. Решение: усиливать бизнес или выходить на найм."><span class="dn">30</span><span class="sh">дневная</span><span class="tk">Итоги двух месяцев</span><span class="chk">✓</span></div>
+</div>
+<div class="note">Цель ноября: 2–3 клиента на обслуживании, курс закончен, резюме AI PM готово.</div></section>
+
+<div class="road">
+<h2>Уже сделано</h2>
+<div class="card t"><b>Сентябрь</b><ul>
+<li>Instagram @aiflow.dubai создан, шапка на английском, категория и 2FA настроены.</li>
+<li>Voiceflow: ИИ-агент ALIEV AI — мозг, база знаний, три языка, защита от вранья.</li>
+<li>Модель переключена на Gemini 3 Flash — дешевле в разы.</li>
+<li>Записано демо-видео с диалогом бота (русская и английская версии).</li>
+</ul></div>
+<h2>Дальше: месяцы 3–12</h2>
+<div class="card"><b>Месяцы 3–6</b><ul>
+<li>Бизнес: 3–5 ретейнеров, поднятые цены, клиенты по рекомендациям.</li>
+<li>AI PM: сертификат, 4–6 кейсов, активные отклики на вакансии.</li>
+</ul></div>
+<div class="card t"><b>Месяцы 6–12</b><ul>
+<li>Развилка с позиции силы: бизнес на фултайм или оффер AI PM (AED 14–22k).</li>
+<li>Фриланс-пермит, если бизнес растёт официально.</li>
+</ul></div>
+</div>
+
+<div class="foot">Каждый заказ — и деньги, и строчка в портфолио AI PM.<br>Не успела задачу — просто сдвинь. Порядок важнее дат.</div>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="sheet" id="sheet">
+<div class="bar"></div>
+<div class="date" id="s_date"></div>
+<span class="shbadge" id="s_shift"></span>
+<div class="full" id="s_full"></div>
+<button id="s_btn"></button>
+</div>
+
+<script>
+var TOTAL = 53;
+var KEY = "plan_done_v2";
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||"{}"); }catch(e){ return {}; } }
+function save(o){ try{ localStorage.setItem(KEY, JSON.stringify(o)); }catch(e){} }
+var done = load();
+var cur = null;
+function refresh(){
+  var cells = document.querySelectorAll('.cell.has');
+  var n=0;
+  cells.forEach(function(c){
+    var dt=c.getAttribute('data-date');
+    if(done[dt]){ c.classList.add('done'); n++; } else { c.classList.remove('done'); }
+  });
+  var pct = TOTAL? Math.round(n/TOTAL*100):0;
+  document.getElementById('pbar').style.width = pct+'%';
+  document.getElementById('plabel').textContent = 'Выполнено '+n+' из '+TOTAL;
+}
+var SHCLASS={'ночная':'n','выходной':'off','дневная':'d'};
+var SHBG={'n':'var(--n)','off':'var(--off)','d':'var(--d)'};
+var SHFG={'n':'var(--nT)','off':'var(--offT)','d':'var(--dT)'};
+function openSheet(c){
+  cur=c;
+  var dt=c.getAttribute('data-date'), sh=c.getAttribute('data-shift'), full=c.getAttribute('data-full');
+  var parts=dt.split('-'); document.getElementById('s_date').textContent=parts[2]+'.'+parts[1]+'.'+parts[0];
+  var b=document.getElementById('s_shift'); b.textContent=sh;
+  var k=SHCLASS[sh]||'off'; b.style.background=SHBG[k]; b.style.color=SHFG[k];
+  document.getElementById('s_full').textContent=full;
+  var btn=document.getElementById('s_btn');
+  if(done[dt]){ btn.textContent='Отменить'; btn.className=''; }
+  else { btn.textContent='Отметить готово'; btn.className='done-btn'; }
+  document.getElementById('backdrop').classList.add('open');
+  document.getElementById('sheet').classList.add('open');
+}
+function closeSheet(){
+  document.getElementById('backdrop').classList.remove('open');
+  document.getElementById('sheet').classList.remove('open'); cur=null;
+}
+document.querySelectorAll('.cell.has').forEach(function(c){
+  c.addEventListener('click',function(){ openSheet(c); });
+});
+document.getElementById('s_btn').addEventListener('click',function(){
+  if(!cur) return;
+  var dt=cur.getAttribute('data-date');
+  if(done[dt]){ delete done[dt]; } else { done[dt]=true; }
+  save(done); refresh(); closeSheet();
+});
+document.getElementById('backdrop').addEventListener('click',closeSheet);
+(function(){
+  var t=new Date(); var iso=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+  var el=document.querySelector('.cell[data-date="'+iso+'"]');
+  if(el) el.classList.add('today');
+})();
+refresh();
+</script>
+</body>
+</html>
